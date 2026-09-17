@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>crim</title>
+    <meta property="og:title" content="blog" />
+    <meta property="og:description" content="Browse posts on reverse engineering, malware analysis, and game security." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://crim.blog/blog" />
+    <meta property="og:site_name" content="crim" />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <span class="prompt">~/$</span> <a href="/">crim</a>
+            </div>
+            <div class="nav-links">
+                <a href="/">[about]</a>
+                <a href="projects">[projects]</a>
+                <a href="blog" class="active">[blog]</a>
+            </div>
+        </nav>
+
+        <div class="page-header">
+            <h1>posts</h1>
+            <p>// reverse engineering, malware analysis, game security</p>
+        </div>
+
+        <div class="post-list">
+            <div class="post-item">
+                <div class="post-meta">
+                       <span class="post-date">
+              <i class="fa-regular fa-calendar"></i> 2026-03-01 </span>
+            		<span class="read-duration">
+              <i class="fa-regular fa-clock"></i> 3 min read </span>
+         	</div>
+                <div class="post-info">
+                    <h3><a href="posts/ecb-attack">AES-ECB Byte at a time attack</a></h3>
+                    <p>Exploiting an AES-ECB encryption oracle to decrypt a secret suffix one byte at a time.</p>
+                </div>
+                <div class="post-tags">
+                    <span class="tag-cryptography">cryptography</span>
+                    <span class="tag-python">python</span>
+                    <span class="tag-pwn">pwn</span>
+                </div>
+            </div>
+            
+            <div class="post-item">
+                <div class="post-meta">
+                       <span class="post-date">
+              <i class="fa-regular fa-calendar"></i> 2026-01-21 </span>
+            		<span class="read-duration">
+              <i class="fa-regular fa-clock"></i> 5 min read </span>
+         	</div>
+                <div class="post-info">
+                    <h3><a href="posts/ida-vuln">Crashing IDA's Decompiler</a></h3>
+                    <p>A simple way to brick IDA's Hex-Rays decompiler with weird _bextr_u64 params.</p>
+                </div>
+                <div class="post-tags">
+                    <span class="tag-windows">windows</span>
+                    <span class="tag-malware">malware</span>
+                    <span class="tag-ida">ida-pro</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2026 crim — <a href="https://github.com/coldtrace/coldtrace.github.io">src</a></p>
+    </footer>
+</body>
+</html>

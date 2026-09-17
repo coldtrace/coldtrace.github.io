@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta property="og:title" content="crim" />
+    <meta property="og:description" content="Malware analysis, reverse engineering, Windows internals, and vulnerability research." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://crim.blog/" />
+    <meta property="og:site_name" content="crim" />
+	
+    <title>crim</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <span class="prompt">~/$</span> <a href="/">crim</a>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="active">[about]</a>
+                <a href="projects">[projects]</a>
+                <a href="blog">[blog]</a>
+            </div>
+        </nav>
+
+        <header>
+            <div class="header-content">
+                <img src="https://github.com/coldtrace.png" alt="Avatar" class="avatar">
+                <div class="header-text">
+                    <h1>crim<span class="cursor"></span></h1>
+                    <p class="title">// malware analyst & low-level security researcher</p>
+                    <div class="social-links">
+                        <a href="https://github.com/coldtrace" target="_blank">
+                            <i class="fa-brands fa-github"></i> github
+                        </a>
+                        <a href="https://www.linkedin.com/in/nicolae-ionut" target="_blank">
+                            <i class="fa-brands fa-linkedin"></i> linkedin
+                        </a>
+                        <a href="https://x.com/crim_x64" target="_blank">
+                            <i class="fa-brands fa-x-twitter"></i> @crim_x64
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="about">
+            <h2>about</h2>
+            <p>
+                Security Researcher based in <span class="highlight">Romania</span>, focused on
+                <span class="highlight">malware analysis</span>, <span class="highlight">reverse engineering</span>,
+                and <span class="highlight">Windows internals</span>. I work primarily with C/C++,
+                x86/x64 assembly, and Python, with interests in
+                <span class="highlight">vulnerability research</span> and <span class="highlight">binary exploitation</span>.
+            </p>
+        </section>
+
+        <section class="skills">
+            <h2>skills</h2>
+            <div class="skills-block">
+                <div class="line comment">// my capabilities</div>
+                <div class="line"><span class="bracket">{</span></div>
+
+                <div class="line">    <span class="key">"primary"</span>: [</div>
+                <div class="line">        <span class="string">"Malware Analysis"</span>,</div>
+                <div class="line">        <span class="string">"Reverse Engineering"</span>,</div>
+                <div class="line">        <span class="string">"Windows Internals"</span>,</div>
+                <div class="line">        <span class="string">"Kernel Driver Analysis"</span></div>
+                <div class="line">    ],</div>
+
+                <div class="line">    <span class="key">"secondary"</span>: [</div>
+                <div class="line">        <span class="string">"Kernel Development"</span>,</div>
+                <div class="line">        <span class="string">"Binary Exploitation"</span>,</div>
+                <div class="line">        <span class="string">"Vulnerability Research"</span></div>
+                <div class="line">    ],</div>
+
+                <div class="line">    <span class="key">"analysis_lab"</span>: [</div>
+                <div class="line">        <span class="string">"FLARE-VM"</span>,</div>
+                <div class="line">        <span class="string">"REMnux"</span></div>
+                <div class="line">    ],</div>
+
+                <div class="line">    <span class="key">"tools"</span>: [</div>
+                <div class="line">        <span class="string">"IDA Pro"</span>,</div>
+                <div class="line">        <span class="string">"x64dbg"</span>,</div>
+                <div class="line">        <span class="string">"WinDbg"</span>,</div>
+                <div class="line">        <span class="string">"Wireshark"</span>,</div>
+                <div class="line">        <span class="string">"Sysinternals"</span></div>
+                <div class="line">    ],</div>
+
+                <div class="line">    <span class="key">"automation"</span>: [</div>
+                <div class="line">        <span class="string">"Python"</span>,</div>
+                <div class="line">        <span class="string">"capa"</span></div>
+                <div class="line">        <span class="string">"YARA"</span>,</div>
+                <div class="line">    ],</div>
+
+                <div class="line">    <span class="key">"frameworks"</span>: [</div>
+                <div class="line">        <span class="string">"MITRE ATT&CK"</span>,</div>
+                <div class="line">        <span class="string">"Unified Kill Chain"</span></div>
+                <div class="line">    ],</div>
+
+                <div class="line">    <span class="key">"languages"</span>: [</div>
+                <div class="line">        <span class="string">"C/C++"</span>,</div>
+                <div class="line">        <span class="string">"x86/x64 Assembly"</span></div>
+                <div class="line">    ]</div>
+
+                <div class="line"><span class="bracket">}</span></div>
+            </div>
+        </section>
+
+        <section class="recent">
+            <h2>recent activity</h2>
+            <div class="activity-list">
+
+                <div class="activity-item">
+                    <span class="activity-type project">[project]</span>
+                    <a href="projects#YarForge">yarforge</a>
+                    <span class="activity-desc">— YARA Rule Generator</span>
+                </div>
+
+                <div class="activity-item">
+                    <span class="activity-type project">[project]</span>
+                    <a href="projects#aes">AES</a>
+                    <span class="activity-desc">— Implementing AES-128 and AES-256 encryption</span>
+                </div>
+
+                <div class="activity-item">
+                    <span class="activity-type writeup">[writeup]</span>
+                    <a href="posts/ecb-attack">AES-ECB Attack</a>
+                    <span class="activity-desc">— How not to use AES</span>
+                </div>
+
+                <div class="activity-item">
+                    <span class="activity-type writeup">[writeup]</span>
+                    <a href="posts/ida-vuln">IDA Vulnerability</a>
+                    <span class="activity-desc">— Crashing the Decompiler</span>
+                </div>
+
+                <div class="activity-item">
+                    <span class="activity-type project">[project]</span>
+                    <a href="projects#pe-library">PE-Library</a>
+                    <span class="activity-desc">— C++ PE parser</span>
+                </div>
+            </div>
+        </section>
+        
+    </div>
+
+    <footer>
+        <p>© 2026 crim — <a href="https://github.com/coldtrace/coldtrace.github.io">src</a></p>
+    </footer>
+</body>
+</html>

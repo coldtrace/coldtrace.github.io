@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AES-ECB Byte at a Time Attack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        code { font-family: 'Consolas', 'Courier New', monospace; }
+        h1, h2 { color: #58a6ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <span class="prompt">~/$</span> <a href="../">crim</a>
+            </div>
+            <div class="nav-links">
+                <a href="../">[about]</a>
+                <a href="../projects">[projects]</a>
+                <a href="../blog" class="active">[blog]</a>
+            </div>
+        </nav>
+
+        <article class="post-article">
+            <header class="post-header">
+                <h1>AES-ECB Byte at a Time Attack</h1>
+                <div class="post-meta">
+                    <span><i class="fa-regular fa-calendar"></i> 2026-03-01</span>
+                    <span><i class="fa-regular fa-clock"></i> 3 min read</span>
+                </div>
+                <div class="post-tags">
+                    <span class="tag-cryptography">cryptography</span>
+                    <span class="tag-python">python</span>
+                    <span class="tag-pwn">pwn</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <p>
+                    AES in ECB mode is deterministic and leaks information when the same key encrypts appended data, especially when an attacker can influence part of the plaintext.
+                </p>
+                <p>
+                    The <strong>byte-at-a-time</strong> attack is a classic chosen-plaintext attack that recovers secret data (usually appended after attacker-controlled input) one byte at a time by aligning blocks and brute-forcing single bytes.
+                </p>
+
+                <h2>Core Requirements</h2>
+                <ul>
+                    <li>AES-128-ECB encryption oracle (you provide plaintext, get ciphertext)</li>
+                    <li>The oracle appends: <code>secret_key ^ (attacker_input || secret_data)</code></li>
+                    <li>Block size is known (usually 16 bytes for AES)</li>
+                </ul>
+
+                <h2>High-Level Steps</h2>
+                <ol>
+                    <li>Determine block size (by watching when ciphertext length increases by 16 bytes)</li>
+                    <li>Find how many bytes of padding are needed so the next unknown byte falls at the <strong>end</strong> of a block</li>
+                    <li>Encrypt once to get the target ciphertext block</li>
+                    <li>Brute-force the last byte (printable range 32–127) until the block matches</li>
+                    <li>Append the discovered byte and repeat sliding the window one byte forward each time</li>
+                </ol>
+
+                <h2>Code Snippet: Alignment</h2>
+                <pre><code class="language-python"># How many filler bytes do we need so the next unknown byte is at position 15 mod 16?
+block_size = 16
+known_bytes = b"already_recovered_prefix"           # grows over time
+
+filler_len = block_size - 1 - (len(known_bytes) % block_size)
+filler     = b"A" * filler_len
+
+payload    = filler + known_bytes
+
+# -> send payload to oracle -> get ct
+# target_block_offset = (len(payload) // block_size) * block_size
+# target_ct_block     = ct[target_block_offset : target_block_offset + block_size]</code></pre>
+
+                <h2>Code Snippet: Brute-force Loop</h2>
+                <pre><code class="language-python">for guess in range(32, 128):          # printable ASCII
+    trial = filler + known_bytes + bytes([guess])
+    
+    trial_ct = encrypt_oracle(trial.hex())     # or however your oracle works
+    trial_block = trial_ct[target_block_offset : target_block_offset + block_size]
+
+    if trial_block == target_ct_block:
+        known_bytes += bytes([guess])
+        break</code></pre>
+
+                <h2>Handling Block Transitions</h2>
+                <p>
+                    The beauty is that you don’t need special logic for new blocks.
+                    As <code>len(known_bytes)</code> grows, <code>filler_len</code> automatically decreases, when it reaches 0, the next iteration will start aligning the <strong>next block</strong>.
+                </p>
+
+                <h2>Common Variations</h2>
+                <ul>
+                    <li>Only brute-force printable chars (32–127) if you know it's text/flag-like</li>
+                    <li>Handle PKCS#7 padding, sometimes the last 1–15 bytes are padding (you'll know if no more printable bytes match)</li>
+                    <li>Use caching: store previously seen ciphertexts for the same prefix to avoid redundant oracle calls</li>
+                </ul>
+
+                <h2>Why This Works</h2>
+                <p>
+                    Because ECB encrypts each 16-byte block independently:
+                </p>
+                <pre><code>Input:  AAAAAAAAAAAAAAAAX  secretbyte...
+Block:  [ controlled + 1 unknown ]   [ rest ]</code></pre>
+                <p>
+                    When you guess the correct <code>X</code>, the entire block ciphertext matches,revealing one byte at a cost of ~256 queries.
+                </p>
+
+                <h2>Takeaway</h2>
+                <p class="highlight">
+                    Never use ECB when the same key encrypts attacker-influenced data appended with secret data. An attacker with enough time on his hands will be able to retrieve it.
+                </p>
+                <p>
+                    Even though AES is strong, ECB turns it into a glorified hash table, perfect for pattern leakage and byte-by-byte recovery attacks like this one.
+                </p>
+
+                <p>
+                    <strong>Tools used:</strong> Python + requests library (for oracle interaction)
+                </p>
+            </div>
+        </article>
+    </div>
+
+    <footer>
+        <p>© 2026 crim — <a href="https://github.com/coldtrace/coldtrace.github.io">src</a></p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+
+</html>
+
